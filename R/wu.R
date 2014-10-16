@@ -1,8 +1,17 @@
 
-wu <- function(formula, data){
+wu <- function(formula, data, subset = NULL){
   
-  #library("Formula")
-  formula <- Formula(formula)
+  
+  formula<-Formula(formula)
+  
+  if(is.null(subset)){
+    subset <- 1:nrow(data)
+  }else{
+    subset <- sort(intersect(subset, 1:nrow(data)))
+  }
+  
+  data <- data[subset, ]
+  
   mf <- model.frame(formula, na.action = na.pass, data = data, lhs=1:2)
   null.B <- model.part(formula, mf, lhs=1, rhs=1, drop=F)
   null.G <- model.part(formula, mf, lhs=2, rhs=1, drop=F)

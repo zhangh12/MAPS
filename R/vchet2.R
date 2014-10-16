@@ -1,8 +1,17 @@
 
-vchet2<-function(formula, data, nperm = 1e5, rho=seq(0, 1, length.out=21), tau=seq(0, 1, length.out=21)){
+vchet2<-function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21), tau=seq(0, 1, length.out=21)){
   
-  #library("Formula")
+  
   formula<-Formula(formula)
+  
+  if(is.null(subset)){
+    subset <- 1:nrow(data)
+  }else{
+    subset <- sort(intersect(subset, 1:nrow(data)))
+  }
+  
+  data <- data[subset, ]
+  
   mf<-model.frame(formula, na.action = na.pass, data = data, lhs=1:2)
   null.B<-model.part(formula, mf, lhs=1, rhs=1, drop=F)
   null.G<-model.part(formula, mf, lhs=2, rhs=1, drop=F)
