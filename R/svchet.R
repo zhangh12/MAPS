@@ -1,5 +1,5 @@
 
-vchet <- function(formula, data, subset = NULL, rho=seq(0, 1, length.out=101)){
+svchet <- function(formula, data, subset = NULL, kappa=seq(0, 1, length.out=101)){
   
   formula<-Formula(formula)
   
@@ -105,21 +105,21 @@ vchet <- function(formula, data, subset = NULL, rho=seq(0, 1, length.out=101)){
   
   np.B <- nrow(V.B)
   np.G <- nrow(V.G)
-  p.rho <- NULL
+  p.kappa <- NULL
   lam <- list()
   var.comp <- NULL
-  #   if(0 %in% rho){
-  #     rho[rho==0] <- 1e-12
+  #   if(0 %in% kappa){
+  #     kappa[kappa==0] <- 1e-12
   #   }
-  for(i in 1:length(rho)){
-    r <- rho[i]
+  for(i in 1:length(kappa)){
+    r <- kappa[i]
     var.comp <- c(var.comp, r * stat.B + (1 - r) * stat.G)
     lam[[i]] <- c(r*lam.B, (1-r)*lam.G)
-    p.rho <- c(p.rho, pchisqsum(var.comp[i], rep(1, length(lam[[i]])), lam[[i]], lower.tail=FALSE, method="saddlepoint"))
+    p.kappa <- c(p.kappa, pchisqsum(var.comp[i], rep(1, length(lam[[i]])), lam[[i]], lower.tail=FALSE, method="saddlepoint"))
   }
   
   
-  stat <- min(p.rho)
+  stat <- min(p.kappa)
   
   if(stat == 1.0){
     pval.VC.Het <- 1.0
@@ -167,20 +167,20 @@ vchet <- function(formula, data, subset = NULL, rho=seq(0, 1, length.out=101)){
     par.G <- liu.mod(stat.G, lam.G)
     par.B <- liu.mod(stat.B, lam.B)
     
-    #t(S.B)%*%S.B <= min((perc-(1-rho) * t(S.G) %*% S.G)/rho)
+    #t(S.B)%*%S.B <= min((perc-(1-kappa) * t(S.G) %*% S.G)/kappa)
     
     ### try the build-in integration routine first
     
-    fn1 <- function(x, perc, rho, par.G, par.B){
+    fn1 <- function(x, perc, kappa, par.G, par.B){
       
-      perc <- perc[rho>0]
-      rho <- rho[rho>0]
+      perc <- perc[kappa>0]
+      kappa <- kappa[kappa>0]
       
       x.star <- (x-par.G$mu.Q)/par.G$sigma.Q * par.G$sigma.X + par.G$mu.X
       x.star[x.star == 0] <- -1e-12
       pdf.G <- par.G$sigma.X / par.G$sigma.Q * dchisq(x.star, df = par.G$df, ncp = par.G$ncp)
-      #q <- min((perc-(1-rho) * x)/rho)
-      q <- apply(rep(1,length(x))%*%t(perc/rho) - x %*% t(1/rho-1), 1, min)
+      #q <- min((perc-(1-kappa) * x)/kappa)
+      q <- apply(rep(1,length(x))%*%t(perc/kappa) - x %*% t(1/kappa-1), 1, min)
       #cdf.B <- pchisq((q-par.B$mu.Q)/par.B$sigma.Q * par.B$sigma.X + par.B$mu.X, df = par.B$df, ncp = par.B$ncp, lower.tail=TRUE)
       cdf.B <- pchisqsum(q, rep(1,length(lam.B)), lam.B, lower.tail=TRUE, method="saddlepoint")
       fval <- pdf.G * cdf.B
@@ -189,16 +189,16 @@ vchet <- function(formula, data, subset = NULL, rho=seq(0, 1, length.out=101)){
       
     }
     
-    fn <- function(x, perc, rho, par.G, par.B){
+    fn <- function(x, perc, kappa, par.G, par.B){
       
-      perc <- perc[rho>0]
-      rho <- rho[rho>0]
+      perc <- perc[kappa>0]
+      kappa <- kappa[kappa>0]
       
       x.star <- (x-par.G$mu.Q)/par.G$sigma.Q * par.G$sigma.X + par.G$mu.X
       x.star[x.star == 0] <- -1e-12
       pdf.G <- log(par.G$sigma.X / par.G$sigma.Q) + dchisq(x.star, df = par.G$df, ncp = par.G$ncp, log=TRUE)
-      #q <- min((perc-(1-rho) * x)/rho)
-      q <- apply(rep(1,length(x))%*%t(perc/rho) - x %*% t(1/rho-1), 1, min)
+      #q <- min((perc-(1-kappa) * x)/kappa)
+      q <- apply(rep(1,length(x))%*%t(perc/kappa) - x %*% t(1/kappa-1), 1, min)
       cdf.B <- pchisq((q-par.B$mu.Q)/par.B$sigma.Q * par.B$sigma.X + par.B$mu.X, df = par.B$df, ncp = par.B$ncp, lower.tail=TRUE, log.p=TRUE)
       fval <- exp(pdf.G + cdf.B)
       
@@ -207,10 +207,10 @@ vchet <- function(formula, data, subset = NULL, rho=seq(0, 1, length.out=101)){
     }
     
     #this function decides the interval of integration
-    search.interval <- function(perc, rho, par.G, par.B){
+    search.interval <- function(perc, kappa, par.G, par.B){
       
-      x <- seq(0,perc[rho==0][1],length.out=1e5+1)
-      f <- fn(x, perc,rho,par.G,par.B)
+      x <- seq(0,perc[kappa==0][1],length.out=1e5+1)
+      f <- fn(x, perc,kappa,par.G,par.B)
       cf <- cumsum(f)
       x.lower <- x[head(which(cf>1e-6),1)]
       x <- rev(x)
@@ -222,23 +222,23 @@ vchet <- function(formula, data, subset = NULL, rho=seq(0, 1, length.out=101)){
         x.lower <- 0
       }
       if(is.na(x.upper) || is.nan(x.upper)){
-        x.upper <- perc[rho==0][1]
+        x.upper <- perc[kappa==0][1]
       }
       
       c(x.lower, x.upper)
       
     }
     
-    interval <- search.interval(perc, rho, par.G, par.B)
+    interval <- search.interval(perc, kappa, par.G, par.B)
     interval[1] <- 0
     
     stat.thr <- 1e-4
     if(stat < stat.thr){
       try.int <- try(pval.VC.Het <- 1-
-                     integrate(fn1, lower=interval[1], upper=interval[2], perc=perc, rho=rho, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
+                     integrate(fn1, lower=interval[1], upper=interval[2], perc=perc, kappa=kappa, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
     }else{
       try.int <- try(pval.VC.Het <- 1-
-                     integrate(fn, lower=interval[1], upper=interval[2], perc=perc, rho=rho, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
+                     integrate(fn, lower=interval[1], upper=interval[2], perc=perc, kappa=kappa, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
     }
     
     #class(try.int) <- "try-error"
@@ -251,9 +251,9 @@ vchet <- function(formula, data, subset = NULL, rho=seq(0, 1, length.out=101)){
       int1 <- NULL
       for(ii in length(c1):1){
         if(stat < stat.thr){
-          t1 <- try(int1 <- integrate(fn1, lower=interval[1], upper=c1[ii], perc=perc, rho=rho, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
+          t1 <- try(int1 <- integrate(fn1, lower=interval[1], upper=c1[ii], perc=perc, kappa=kappa, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
         }else{
-          t1 <- try(int1 <- integrate(fn, lower=interval[1], upper=c1[ii], perc=perc, rho=rho, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
+          t1 <- try(int1 <- integrate(fn, lower=interval[1], upper=c1[ii], perc=perc, kappa=kappa, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
         }
         if(class(t1) != "try-error"){
           ec1 <- c1[ii]
@@ -267,9 +267,9 @@ vchet <- function(formula, data, subset = NULL, rho=seq(0, 1, length.out=101)){
         int2 <- NULL
         for(ii in length(c2):1){
           if(stat < stat.thr){
-            t2 <- try(int2 <- integrate(fn1, lower=ec1, upper=c2[ii], perc=perc, rho=rho, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
+            t2 <- try(int2 <- integrate(fn1, lower=ec1, upper=c2[ii], perc=perc, kappa=kappa, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
           }else{
-            t2 <- try(int2 <- integrate(fn, lower=ec1, upper=c2[ii], perc=perc, rho=rho, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
+            t2 <- try(int2 <- integrate(fn, lower=ec1, upper=c2[ii], perc=perc, kappa=kappa, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
           }
           if(class(t2) != "try-error"){
             ec2 <- c2[ii]
@@ -280,9 +280,9 @@ vchet <- function(formula, data, subset = NULL, rho=seq(0, 1, length.out=101)){
         if(!is.null(int2)){
           if(ec2<interval[2]){
             if(stat < stat.thr){
-              t3 <- try(int3 <- integrate(fn1, lower=ec2, upper=interval[2], perc=perc, rho=rho, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
+              t3 <- try(int3 <- integrate(fn1, lower=ec2, upper=interval[2], perc=perc, kappa=kappa, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
             }else{
-              t3 <- try(int3 <- integrate(fn, lower=ec2, upper=interval[2], perc=perc, rho=rho, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
+              t3 <- try(int3 <- integrate(fn, lower=ec2, upper=interval[2], perc=perc, kappa=kappa, par.G=par.G, par.B=par.B, subdivisions=2000, rel.tol=1e-8)$value, silent=TRUE)
             }
             if(class(t3) != "try-error"){
               pval.VC.Het <- 1-int1-int2-int3
@@ -313,7 +313,7 @@ vchet <- function(formula, data, subset = NULL, rho=seq(0, 1, length.out=101)){
     if(mcmc){
       
       print("Fail to compute the p-value with build-in integration function. Trying MCMC")
-      rho[rho==0] <- 1e-12
+      kappa[kappa==0] <- 1e-12
       pval.VC.Het <- NULL
       NP <- ifelse(stat >= 1e-5, 1, ifelse(stat >=1e-6, 10, 100))
       for(i in 1:NP){
@@ -324,9 +324,9 @@ vchet <- function(formula, data, subset = NULL, rho=seq(0, 1, length.out=101)){
         rm(u)
         gc()
         
-        upper <- apply(perc/rho - (1/rho-1) %*% t(stat.G.null), 2, min)
+        upper <- apply(perc/kappa - (1/kappa-1) %*% t(stat.G.null), 2, min)
         
-        #variance component test for heterogeneity (vchet)
+        #variance component test for heterogeneity (svchet)
         p <- liu.mod(upper, lam.B)$Qq
         pval.VC.Het <- c(pval.VC.Het, mean(p))
         rm(p)
@@ -340,9 +340,9 @@ vchet <- function(formula, data, subset = NULL, rho=seq(0, 1, length.out=101)){
     
   }
   
-  rho.opt <- rho[p.rho == stat][1]
-  if(rho.opt<=1e-12){
-    rho.opt <- 0
+  kappa.opt <- mean(kappa[p.kappa == stat])
+  if(kappa.opt<=1e-12){
+    kappa.opt <- 0
   }
   
   
@@ -350,12 +350,12 @@ vchet <- function(formula, data, subset = NULL, rho=seq(0, 1, length.out=101)){
   
   pval <- c(VC.Het=pval.VC.Het)
   
-  vchet.obj <- list()
-  vchet.obj$pval <- pval
-  vchet.obj$method <- method
-  vchet.obj$rho.opt <- rho.opt
-  class(vchet.obj) <- "vchet"
-  vchet.obj
+  svchet.obj <- list()
+  svchet.obj$pval <- pval
+  svchet.obj$method <- method
+  svchet.obj$kappa.opt <- kappa.opt
+  class(svchet.obj) <- "svchet"
+  svchet.obj
   
 }
 

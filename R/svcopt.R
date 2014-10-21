@@ -1,5 +1,6 @@
 
-vccor<-function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=101)){
+svcopt<-function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21), kappa=seq(0, 1, length.out=21)){
+  
   
   formula<-Formula(formula)
   
@@ -83,26 +84,40 @@ vccor<-function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.
   x<-minp
   rx<-minp
   u<-NULL
-  for(rho0 in rho){
-    x<- x1 + x2 + 2*rho0 * x3
-    rx<-rank(-x, ties="min")
-    u<-c(u, rx[1])
-    minp<-pmin(minp, rx)
+  for(kappa0 in kappa){
+    for(rho0 in rho){
+      x<-kappa0 * x1 + (1-kappa0) * x2 + 2*rho0*sqrt(kappa0*(1-kappa0)) * x3
+      rx<-rank(-x, ties="min")
+      u<-c(u, rx[1])
+      minp<-pmin(minp, rx)
+    }
   }
   
   pval<-mean(minp<=minp[1])
   
-  min.id<-which(u==min(u))[1]
-  rho.opt <- rho[min.id]
+  min.id<-which(u==min(u))
+  k<-0
+  kappa.opt <- NULL
+  rho.opt <- NULL
+  for(kappa0 in kappa){
+    for(rho0 in rho){
+      k<-k+1
+      if(k %in% min.id){
+        kappa.opt<-c(kappa.opt, kappa0)
+        rho.opt<-c(rho.opt, rho0)
+      }
+    }
+  }
   
-  pval <- c(VC.Cor=pval)
+  pval <- c(VC.Het2=pval)
   
-  vccor.obj <- list()
-  vccor.obj$pval <- pval
-  vccor.obj$nperm <- nperm
-  vccor.obj$rho.opt <- rho.opt
-  class(vccor.obj) <- "vccor"
-  vccor.obj
+  svcopt.obj <- list()
+  svcopt.obj$pval <- pval
+  svcopt.obj$nperm <- nperm
+  svcopt.obj$rho.opt <- mean(rho.opt)
+  svcopt.obj$kappa.opt <- mean(kappa.opt)
+  class(svcopt.obj) <- "svcopt"
+  svcopt.obj
   
 }
 

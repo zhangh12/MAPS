@@ -1,5 +1,5 @@
 
-vchom <- function(formula, data, subset = NULL){
+svchom <- function(formula, data, subset = NULL){
   
   
   formula<-Formula(formula)
@@ -86,10 +86,10 @@ vchom <- function(formula, data, subset = NULL){
             SKAT.B=pval.SKAT.B, SKAT.G=pval.SKAT.G, 
             Fisher=pval.Fisher, minp=pval.minp)
   
-  vchom.obj <- list()
-  vchom.obj$pval <- pval
-  class(vchom.obj) <- "vchom"
-  vchom.obj
+  svchom.obj <- list()
+  svchom.obj$pval <- pval
+  class(svchom.obj) <- "svchom"
+  svchom.obj
   
 }
 

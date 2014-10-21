@@ -1,6 +1,5 @@
 
-vchet2<-function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21), tau=seq(0, 1, length.out=21)){
-  
+svccor<-function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=101)){
   
   formula<-Formula(formula)
   
@@ -84,39 +83,26 @@ vchet2<-function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length
   x<-minp
   rx<-minp
   u<-NULL
-  for(tau0 in tau){
-    for(rho0 in rho){
-      x<-tau0 * x1 + (1-tau0) * x2 + 2*rho0*sqrt(tau0*(1-tau0)) * x3
-      rx<-rank(-x, ties="min")
-      u<-c(u, rx[1])
-      minp<-pmin(minp, rx)
-    }
+  for(rho0 in rho){
+    x<- x1 + x2 + 2*rho0 * x3
+    rx<-rank(-x, ties="min")
+    u<-c(u, rx[1])
+    minp<-pmin(minp, rx)
   }
   
   pval<-mean(minp<=minp[1])
   
-  min.id<-which(u==min(u))[1]
-  k<-0
-  for(tau0 in tau){
-    for(rho0 in rho){
-      k<-k+1
-      if(k == min.id){
-        tau.opt<-tau0
-        rho.opt<-rho0
-        break
-      }
-    }
-  }
+  min.id<-which(u==min(u))
+  rho.opt <- mean(rho[min.id])
   
-  pval <- c(VC.Het2=pval)
+  pval <- c(VC.Cor=pval)
   
-  vchet2.obj <- list()
-  vchet2.obj$pval <- pval
-  vchet2.obj$nperm <- nperm
-  vchet2.obj$rho.opt <- rho.opt
-  vchet2.obj$tau.opt <- tau.opt
-  class(vchet2.obj) <- "vchet2"
-  vchet2.obj
+  svccor.obj <- list()
+  svccor.obj$pval <- pval
+  svccor.obj$nperm <- nperm
+  svccor.obj$rho.opt <- rho.opt
+  class(svccor.obj) <- "svccor"
+  svccor.obj
   
 }
 
