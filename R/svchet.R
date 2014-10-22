@@ -1,5 +1,5 @@
-
-svchet <- function(formula, data, subset = NULL, kappa=seq(0, 1, length.out=101)){
+svchet <-
+function(formula, data, subset = NULL, kappa=seq(0, 1, length.out=101)){
   
   formula<-Formula(formula)
   
@@ -358,4 +358,3 @@ svchet <- function(formula, data, subset = NULL, kappa=seq(0, 1, length.out=101)
   svchet.obj
   
 }
-

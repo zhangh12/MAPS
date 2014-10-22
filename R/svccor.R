@@ -1,5 +1,5 @@
-
-svccor<-function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=101)){
+svccor <-
+function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=101)){
   
   formula<-Formula(formula)
   
@@ -105,4 +105,3 @@ svccor<-function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length
   svccor.obj
   
 }
-

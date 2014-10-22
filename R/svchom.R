@@ -1,5 +1,5 @@
-
-svchom <- function(formula, data, subset = NULL){
+svchom <-
+function(formula, data, subset = NULL){
   
   
   formula<-Formula(formula)
@@ -92,4 +92,3 @@ svchom <- function(formula, data, subset = NULL){
   svchom.obj
   
 }
-

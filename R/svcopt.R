@@ -1,5 +1,5 @@
-
-svcopt<-function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21), kappa=seq(0, 1, length.out=21)){
+svcopt <-
+function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21), kappa=seq(0, 1, length.out=21)){
   
   
   formula<-Formula(formula)
@@ -120,4 +120,3 @@ svcopt<-function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length
   svcopt.obj
   
 }
-

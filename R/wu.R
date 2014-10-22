@@ -1,5 +1,5 @@
-
-wu <- function(formula, data, subset = NULL){
+wu <-
+function(formula, data, subset = NULL){
   
   
   formula<-Formula(formula)
@@ -91,4 +91,3 @@ wu <- function(formula, data, subset = NULL){
   wu.obj
   
 }
-
