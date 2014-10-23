@@ -2,6 +2,7 @@
 \alias{wu}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
+wu
 %%  ~~function to do ... ~~
 }
 \description{

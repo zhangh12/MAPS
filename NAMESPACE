@@ -1,6 +1,11 @@
 exportPattern("^[[:alpha:]]+")
+useDynLib(SVCT)
 import("Formula")
 import("CompQuadForm")
 import("survey")
 import("mvtnorm")
-export("svcopt”, "svccor”, "svchet”, "svchom”, "wu")
+<<<<<<< HEAD
+export("plot", "svcopt", "svccor", "svchet", "svchom", "wu")
+=======
+export("svcopt", "svccor", "svchet", "svchom", "wu")
+>>>>>>> origin/master
