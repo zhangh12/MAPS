@@ -1,5 +1,5 @@
 svcopt <-
-function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21), kappa=seq(0, 1, length.out=21)){
+function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21), kappa=seq(0, 1, length.out=21), seed = NULL, nthread=NULL, plot.pval = FALSE){
   
   
   formula<-Formula(formula)
@@ -54,13 +54,15 @@ function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21)
   A<-y.hat * (1-y.hat)
   V.B<-t(G.B)%*% (A * G.B) - t(G.B)%*% (A * X.B) %*% solve(t(X.B) %*% (A * X.B)) %*% t(X.B) %*% (A * G.B) #much faster
   V.B<-V.B/n.B #standarize
-  lam.B<-eigen(V.B)$values
+  ei.B <- eigen(V.B)
+  lam.B<-ei.B$values
   
   res.G<-null.G[, resp.G]-mdl0.G$fitted.values
   s2<-sum(res.G^2)/(n.G-ncol(X.G))
   V.G<-(t(G.G) %*% G.G - t(G.G) %*% X.G %*% solve(t(X.G) %*% X.G) %*% t(X.G) %*% G.G)/s2
   V.G<-V.G/n.G #standarize
-  lam.G<-eigen(V.G)$values
+  ei.G <-eigen(V.G)
+  lam.G<-ei.G$values
   
   S.B<-t(G.B)%*%res.B/sqrt(n.B)
   S.G<-t(G.G)%*%res.G/s2/sqrt(n.G)
@@ -69,33 +71,34 @@ function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21)
   stat.G<-t(S.G)%*%S.G
   stat.BG<-t(S.B)%*%S.G
   
+  sqrt.V.B <- ei.B$vectors %*% diag(sqrt(abs(ei.B$values))) %*% ei.B$vectors
+  sqrt.V.G <- ei.G$vectors %*% diag(sqrt(abs(ei.G$values))) %*% ei.G$vectors
   
-  S.B0<-rbind(t(S.B), rmvnorm(nperm, sigma=V.B))
-  S.G0<-rbind(t(S.G), rmvnorm(nperm, sigma=V.G))
-  
-  x1<-rowSums(S.B0^2)
-  x2<-rowSums(S.G0^2)
-  x3<-rowSums(S.B0*S.G0)
-  rm(S.B0)
-  rm(S.G0)
-  gc()
-  
-  minp<-rep(nperm+2,nperm+1)
-  x<-minp
-  rx<-minp
-  u<-NULL
-  for(kappa0 in kappa){
-    for(rho0 in rho){
-      x<-kappa0 * x1 + (1-kappa0) * x2 + 2*rho0*sqrt(kappa0*(1-kappa0)) * x3
-      rx<-rank(-x, ties="min")
-      u<-c(u, rx[1])
-      minp<-pmin(minp, rx)
-    }
+  if(is.null(nthread)){
+    nthread <- 0
   }
   
-  pval<-mean(minp<=minp[1])
+  if(is.null(seed)){
+    seed <- 0
+  }
   
-  min.id<-which(u==min(u))
+  pval <- -1.0
+  obs.rank <- rep(-1, length(rho) * length(kappa))
+  
+  dyn.load("/home/zhangh12/vc/code/evalp.so")
+  tmp <- .C("eval_pval_opt", as.double(as.vector(S.B)), as.double(as.vector(S.G)), 
+            as.double(as.vector(sqrt.V.B)), as.double(as.vector(sqrt.V.G)), 
+            as.double(rho), as.double(kappa), 
+            as.integer(ncol(G.B)), as.integer(nperm), 
+            as.integer(length(rho)), as.integer(length(kappa)), 
+            as.integer(seed), as.integer(nthread), 
+            pval = as.double(pval), obs.rank = as.integer(obs.rank))
+  dyn.unload("/home/zhangh12/vc/code/evalp.so")
+  
+  pval<-c(VC.Opt = tmp$pval)
+  obs.rank <- tmp$obs.rank
+  
+  min.id<-which(obs.rank==min(obs.rank))
   k<-0
   kappa.opt <- NULL
   rho.opt <- NULL
@@ -109,14 +112,25 @@ function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21)
     }
   }
   
-  pval <- c(VC.Het2=pval)
-  
   svcopt.obj <- list()
   svcopt.obj$pval <- pval
   svcopt.obj$nperm <- nperm
   svcopt.obj$rho.opt <- mean(rho.opt)
   svcopt.obj$kappa.opt <- mean(kappa.opt)
+  svcopt.obj$obs.rank <- matrix(obs.rank, nrow = length(kappa), byrow = TRUE)
+  rownames(svcopt.obj$obs.rank) <- paste0("kappa_", 1:length(kappa))
+  colnames(svcopt.obj$obs.rank) <- paste0("rho_", 1:length(rho))
+  svcopt.obj$rho <- rho
+  svcopt.obj$kappa <- kappa
   class(svcopt.obj) <- "svcopt"
+  
+  if(plot.pval){
+    plot.svcopt(svcopt.obj)
+  }
+  
   svcopt.obj
   
 }
+
+
+

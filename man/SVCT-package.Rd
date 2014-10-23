@@ -4,7 +4,7 @@
 \docType{package}
 \title{
 What the package does (short line)
-~~ package title ~~
+%~~ package title ~~
 }
 \description{
 More about what it does (maybe more than one line)
@@ -30,13 +30,13 @@ Maintainer: Who to complain to <yourfault@somewhere.net>
 \references{
 ~~ Literature or other references for background information ~~
 }
-~~ Optionally other standard keywords, one per line, from file ~~
-~~ KEYWORDS in the R documentation directory ~~
+%~~ Optionally other standard keywords, one per line, from file ~~
+%~~ KEYWORDS in the R documentation directory ~~
 \keyword{ package }
 \seealso{
 ~~ Optional links to other man pages, e.g. ~~
 ~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
 }
 \examples{
-~~ simple examples of the most important functions ~~
+%~~ simple examples of the most important functions ~~
 }
