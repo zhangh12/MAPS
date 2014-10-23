@@ -1,15 +1,12 @@
 Package: SVCT
 Type: Package
 Title: Stratified Variance Component Test
-Version: 0.1.4
-<<<<<<< HEAD
+Version: 0.1.5
 Date: 2014-10-23
-=======
-Date: 2014-10-22
->>>>>>> origin/master
 Author: Han Zhang
 Maintainer: Han Zhang <han.zhang2@nih.gov>
 Description: Variance component test for genetic association studies with outcome stratified samples
 URL: https://github.com/zhangh12/SVCT
 License: GPL-3
 Depends: R (>= 3.0.3), Formula, CompQuadForm, survey, mvtnorm
+Packaged: 2014-10-23 20:13:35 UTC; zhangh12

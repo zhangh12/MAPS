@@ -4,8 +4,4 @@ import("Formula")
 import("CompQuadForm")
 import("survey")
 import("mvtnorm")
-<<<<<<< HEAD
 export("plot", "svcopt", "svccor", "svchet", "svchom", "wu")
-=======
-export("svcopt", "svccor", "svchet", "svchom", "wu")
->>>>>>> origin/master

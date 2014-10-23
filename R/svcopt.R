@@ -1,9 +1,5 @@
 svcopt <-
-<<<<<<< HEAD
 function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21), kappa=seq(0, 1, length.out=21), seed = 0, nthread=NULL, plot.pval = FALSE){
-=======
-function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21), kappa=seq(0, 1, length.out=21), seed = NULL, nthread=NULL, plot.pval = FALSE){
->>>>>>> origin/master
   
   
   formula<-Formula(formula)
@@ -89,11 +85,7 @@ function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21)
   pval <- -1.0
   obs.rank <- rep(-1, length(rho) * length(kappa))
   
-<<<<<<< HEAD
   #dyn.load("/home/zhangh12/vc/code/evalp.so")
-=======
-  dyn.load("/home/zhangh12/vc/code/evalp.so")
->>>>>>> origin/master
   tmp <- .C("eval_pval_opt", as.double(as.vector(S.B)), as.double(as.vector(S.G)), 
             as.double(as.vector(sqrt.V.B)), as.double(as.vector(sqrt.V.G)), 
             as.double(rho), as.double(kappa), 
@@ -101,11 +93,7 @@ function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21)
             as.integer(length(rho)), as.integer(length(kappa)), 
             as.integer(seed), as.integer(nthread), 
             pval = as.double(pval), obs.rank = as.integer(obs.rank))
-<<<<<<< HEAD
   #dyn.unload("/home/zhangh12/vc/code/evalp.so")
-=======
-  dyn.unload("/home/zhangh12/vc/code/evalp.so")
->>>>>>> origin/master
   
   pval<-c(VC.Opt = tmp$pval)
   obs.rank <- tmp$obs.rank
@@ -137,11 +125,7 @@ function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21)
   class(svcopt.obj) <- "svcopt"
   
   if(plot.pval){
-<<<<<<< HEAD
     plot(svcopt.obj)
-=======
-    plot.svcopt(svcopt.obj)
->>>>>>> origin/master
   }
   
   svcopt.obj
@@ -149,7 +133,3 @@ function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21)
 }
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/master
