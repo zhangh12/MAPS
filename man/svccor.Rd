@@ -2,7 +2,6 @@
 \alias{svccor}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-svccor
 %%  ~~function to do ... ~~
 }
 \description{

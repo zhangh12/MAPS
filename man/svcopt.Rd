@@ -2,7 +2,6 @@
 \alias{svcopt}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-svcopt
 %%  ~~function to do ... ~~
 }
 \description{

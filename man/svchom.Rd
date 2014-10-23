@@ -2,7 +2,6 @@
 \alias{svchom}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-svchom
 %%  ~~function to do ... ~~
 }
 \description{
