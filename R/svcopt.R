@@ -129,7 +129,7 @@ function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21)
   colnames(svcopt.obj$obs.rank) <- paste0("rho_", 1:length(rho))
   svcopt.obj$rho <- rho
   svcopt.obj$kappa <- kappa
-  #svcopt.obj$stat <- stat
+  svcopt.obj$stat <- stat
   svcopt.obj$refine <- ifelse(refine == 1, TRUE, FALSE)
   class(svcopt.obj) <- "svcopt"
   

@@ -1,39 +1,60 @@
 \name{svcopt}
 \alias{svcopt}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-svcopt
-%%  ~~function to do ... ~~
+Optimal Stratified Variance Component Test
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+\code{svcopt} is used to perform the stratified variance component test with optimal tuning on parameters of variance component proportion and effect correlation.
 }
 \usage{
-svcopt(formula, data, subset = NULL, nperm = 1e+05, rho = seq(0, 1, length.out = 21), kappa = seq(0, 1, length.out = 21))
+svcopt(formula, data, subset = NULL, nperm = 1e+05, 
+       rho = seq(0, 1, length.out = 21), 
+       kappa = seq(0, 1, len = 21), seed = 0, 
+       nthread = NULL, plot.pval = FALSE)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{formula}{
 %%     ~~Describe \code{formula} here~~
+an object of clas "\code{Formula}". The user can specify two outcomes on the left-hand side. The covariates and the variables of interest can be specified on the right-hand side. See 'Details' below.
 }
   \item{data}{
 %%     ~~Describe \code{data} here~~
+a data frame containing all variables specified in \code{formula}.
 }
   \item{subset}{
 %%     ~~Describe \code{subset} here~~
+an optional vector specifying a subset of observations to be used in the testing process.
 }
   \item{nperm}{
 %%     ~~Describe \code{nperm} here~~
+an integer specifying the number of replicates used in Monte Carlo test.
 }
   \item{rho}{
 %%     ~~Describe \code{rho} here~~
+a vector of effect correlation parameter used in tuning process.
 }
   \item{kappa}{
 %%     ~~Describe \code{kappa} here~~
+a vector of variance component proportion parameter used in tuning process.
+}
+  \item{seed}{
+an integer used as the random seed. 
+}
+  \item{nthread}{
+an interger specifying the number of threads used in parallelizing the Monte Carlo test. Use all available threads by default. 
+}
+  \item{plot.pval}{
+a logical indicating whether to draw a plot of the unadjusted p-values for each pair of \code{rho} and \code{kappa}. See 'Details' below.
 }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
+The \code{formula} is parsed by the package \code{\link[Formula]{Formula}}. On the left-hand side, the binary outcome must be specified first, then the continuous outcome is specified, separated by |. One the right-hand side, the covariates must be specified first, then the variables of interest are specified, separated by |. A valid formula, e.g.,
+
+\code{SMOKE | CIG_PER_DAY ~ AGE + SEX | SNP1 + SNP2 + SNP3}
+
+means that the variable \code{SMOKE} is the binary outcome, \code{CIG_PER_DAY} is the continuous outcome. Both outcomes should be adjusted by \code{AGE} and \code{SEX}. The function will test the joint association effect of three SNPs, i.e., \code{SNP1}, \code{SNP2}, \code{SNP3}.
+}
 }
 \value{
 %%  ~Describe the value returned
@@ -41,6 +62,7 @@ svcopt(formula, data, subset = NULL, nperm = 1e+05, rho = seq(0, 1, length.out =
 %%  \item{comp1 }{Description of 'comp1'}
 %%  \item{comp2 }{Description of 'comp2'}
 %% ...
+\code{svcopt} returns a list of class "\code{svcopt}" containing p-value and other useful information.
 }
 \references{
 %% ~put references to the literature/web site here ~
