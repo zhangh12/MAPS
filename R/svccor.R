@@ -5,6 +5,7 @@ function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=101
   
   svccor.obj <- list()
   svccor.obj$pval <- obj$pval
+  names(svccor.obj$pval) <- "VC.Cor"
   svccor.obj$nperm <- nperm
   svccor.obj$rho.opt <- obj$rho.opt
   svccor.obj$obs.rank <- as.vector(obj$obs.rank)
