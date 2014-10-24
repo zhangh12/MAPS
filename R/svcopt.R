@@ -71,8 +71,8 @@ function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21)
   stat.G<-t(S.G)%*%S.G
   stat.BG<-t(S.B)%*%S.G
   
-  sqrt.V.B <- ei.B$vectors %*% diag(sqrt(abs(ei.B$values))) %*% ei.B$vectors
-  sqrt.V.G <- ei.G$vectors %*% diag(sqrt(abs(ei.G$values))) %*% ei.G$vectors
+  sqrt.V.B <- ei.B$vectors %*% diag(sqrt(abs(ei.B$values))) %*% t(ei.B$vectors)
+  sqrt.V.G <- ei.G$vectors %*% diag(sqrt(abs(ei.G$values))) %*% t(ei.G$vectors)
   
   if(is.null(nthread)){
     nthread <- 0
@@ -84,7 +84,8 @@ function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21)
   
   pval <- -1.0
   obs.rank <- rep(-1, length(rho) * length(kappa))
-  
+  stat <- rep(-1, nperm+1)
+  refine <- -1
   #dyn.load("/home/zhangh12/vc/code/evalp.so")
   tmp <- .C("eval_pval_opt", as.double(as.vector(S.B)), as.double(as.vector(S.G)), 
             as.double(as.vector(sqrt.V.B)), as.double(as.vector(sqrt.V.G)), 
@@ -92,11 +93,17 @@ function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21)
             as.integer(ncol(G.B)), as.integer(nperm), 
             as.integer(length(rho)), as.integer(length(kappa)), 
             as.integer(seed), as.integer(nthread), 
-            pval = as.double(pval), obs.rank = as.integer(obs.rank))
+            pval = as.double(pval), obs.rank = as.integer(obs.rank), 
+            stat = as.integer(stat), refine = as.integer(refine))
   #dyn.unload("/home/zhangh12/vc/code/evalp.so")
   
   pval<-c(VC.Opt = tmp$pval)
   obs.rank <- tmp$obs.rank
+  stat <- tmp$stat
+  refine <- tmp$refine
+  if(refine == -1){
+    stop("Invalid tag of refine, please debug")
+  }
   
   min.id<-which(obs.rank==min(obs.rank))
   k<-0
@@ -122,6 +129,8 @@ function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=21)
   colnames(svcopt.obj$obs.rank) <- paste0("rho_", 1:length(rho))
   svcopt.obj$rho <- rho
   svcopt.obj$kappa <- kappa
+  #svcopt.obj$stat <- stat
+  svcopt.obj$refine <- ifelse(refine == 1, TRUE, FALSE)
   class(svcopt.obj) <- "svcopt"
   
   if(plot.pval){

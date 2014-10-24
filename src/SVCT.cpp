@@ -69,7 +69,7 @@ double * const input_rho, double * const input_kappa,
 const int * input_np, const int * input_nperm, 
 const int * input_nrho, const int * input_nkappa, 
 const int * input_seed, const int * input_nthread, 
-double *pval, int *obs_rank){
+double *pval, int *obs_rank, int *stat, int *refine){
 	
 	int np = *input_np;
 	int nperm = *input_nperm;
@@ -171,7 +171,7 @@ double *pval, int *obs_rank){
 				#pragma omp for
 				for(int k = 0; k < nperm+1; ++k){
 					score_tmp[k].val = kappa[i] * x1[k] + (1.0-kappa[i]) * x2[k] + 2*rho[j] * sqrt(kappa[i]*(1.0-kappa[i])) * x3[k];
-					score_tmp[k].id = k;
+					score_tmp[k].id = k;//Note: starting from 1 rather than 0
 				}
 			}
 			
@@ -183,7 +183,7 @@ double *pval, int *obs_rank){
 				for(int k = 0; k < nperm +1; ++k){
 					int id = score_tmp[k].id;
 					if(id == 0){
-						obs_rank[l] = k;
+						obs_rank[l] = k+1;
 					}
 					
 					if(rank_ref[id] > k){
@@ -194,16 +194,36 @@ double *pval, int *obs_rank){
 			
 		}
 	}
-	
-	
-	*pval = .0;
-	for(int k = 0; k < nperm + 1; ++k){
-		if(rank_ref[k] <= rank_ref[0]){
-			*pval += 1.0;
-		}
-	}
+  
+  vector<int> subsum(nthread, 0);
+  vector<int> subtie(nthread, 0);
+  #pragma omp parallel num_threads(nthread)
+  {
+    #pragma omp for
+    for(int k = 0; k < nperm + 1; ++k){
+      stat[k] = rank_ref[k];
+      if(k > 0){
+        int tid = omp_get_thread_num();
+    		if(rank_ref[k] < rank_ref[0]){
+    			subsum[tid] += 1;
+    		}else if(rank_ref[k] == rank_ref[0]){
+          subtie[tid] += 1;
+    		}
+      }
+  	}
+  }
+
+  *pval = 1.0;
+  int rep = 0;
+  for(int i = 0; i < nthread; ++i){
+    *pval += subsum[i];
+    rep += subtie[i];
+  }
+  *pval += rep/2.0;
 	
 	*pval /= nperm+1;
+  
+  *refine = (rep > 0 && rank_ref[0] == 0) ? 1 : 0;
 	
 }
 
