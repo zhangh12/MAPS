@@ -9,8 +9,8 @@ Optimal Stratified Variance Component Test
 \usage{
 svcopt(formula, data, subset = NULL, nperm = 1e+05, 
        rho = seq(0, 1, length.out = 21), 
-       kappa = seq(0, 1, len = 21), seed = 0, 
-       nthread = NULL, plot.pval = FALSE)
+       kappa = seq(0, 1, len = 21), na.rm = FALSE, 
+       seed = 0, nthread = NULL, plot.pval = FALSE)
 }
 \arguments{
   \item{formula}{
@@ -37,6 +37,9 @@ a vector of effect correlation parameter used in tuning process.
 %%     ~~Describe \code{kappa} here~~
 a vector of variance component proportion parameter used in tuning process.
 }
+  \item{na.rm}{
+a logical indicating whether to allow individuals with missing values in variables of interest. The current version always set it as \code{FALSE} as using more samples can increase power. See 'Details' below.
+}
   \item{seed}{
 an integer used as the random seed. 
 }
@@ -56,6 +59,8 @@ The \code{formula} is parsed by the package \code{\link[Formula]{Formula}}. On t
 means that the variable \code{SMOKE} is the binary outcome, \code{CIG_PER_DAY} is the continuous outcome. Both outcomes should be adjusted by \code{AGE} and \code{SEX}. The function will test the joint association effect of three SNPs, i.e., \code{SNP1}, \code{SNP2}, \code{SNP3}.
 
 Ge's minp algorithm is used in evaluating the final p-value accounting for multiple-comparison in tuning parameters of \code{rho} and \code{kappa}. It will produce unadjusted statistics which are returned as \code{$obs.rank}. See 'Value' below. A generic function \code{plot} can be used to visualize these statistics (standardized as p-values), which gives intuition of the optimal chosen \code{$rho.opt} and \code{$kappa.opt}.
+
+One of the major problems for gene-level test is that it doesn't allow missing genotypes. In practice, the user has to exclude individuals even with one missing entry. Although generally the SNPs included in a gene pass the quality control, e.g., missing rate < 2\%, however, a substantial proportion of individuals can be excluded in testing the association, especially for large gene. This can reduce the statistical power or more seriously, bias the inference. We propose to use the modified scores defined on all observed genotypes to generalize the score tests, which provides more flexibility to in real application. Please refer to our paper for more details.
 }
 
 \value{
@@ -79,11 +84,11 @@ An object of class "\code{svcopt}" is a list containing the following components
 \item{stat}{a vector of statistics used to estimate the final p-value \code{$pval}.}
 }
 \references{
-Zhang, H., Yang, Y., Wu, C.O., and Yu K. (2014) Optimal variance component test for stratified sampling design with its application to the genome-wide association study of smoking behaviors. Submitted.
+Zhang, H., Wu, C.O., Yang, Y., and Yu K. (2014) Optimal variance component test for stratified sampling design with its application to the genome-wide association study of aggressive prostate cancer. Submitted.
 
-Wu, C.O., Zheng, G., and Kwak, M. (2013) A joint regression analysis for genetic association studies with outcome stratified samples. \emph{Biometrics}, \bold{69}, 417--426.
+Wu, C.O., Zheng, G., and Kwak, M. (2013) A joint regression analysis for genetic association studies with outcome stratified samples. \emph{Biometrics} \bold{69}, 417--426.
 
-Ge, Y., Dudoit, S., and Speed, T. (2003) Resampling-based multiple testing for microarray data analysis, \emph{Test}, \bold{12}, 1--77. 
+Ge, Y., Dudoit, S., and Speed, T. (2003) Resampling-based multiple testing for microarray data analysis, \emph{Test} \bold{12}, 1--77. 
 %% ~put references to the literature/web site here ~
 }
 \author{

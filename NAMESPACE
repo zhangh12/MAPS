@@ -1,5 +1,5 @@
 exportPattern("^[[:alpha:]]+")
 useDynLib(SVCT)
 import(graphics, Formula, metafor, survey, mvtnorm)
-export(svcopt, svcopt0, svccor, svchet, svchom, wu, gforest)
-S3method(plot, svcopt, svcopt0)
+export(data.parse, svcopt, svccor, svchet, svchom, wu, gforest)
+S3method(plot, svcopt)

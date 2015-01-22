@@ -1,7 +1,7 @@
 svccor <-
-function(formula, data, subset = NULL, nperm = 1e5, rho=seq(0, 1, length.out=101), seed = 0, nthread = NULL){
+function(data, formula = NULL, subset = NULL, nperm = 1e5, rho=seq(-1, 1, length.out=21), na.rm = FALSE, seed = 0, nthread = NULL){
   
-  obj <- svcopt(formula, data, subset, nperm, rho, kappa = c(.5), seed, nthread, plot.pval = FALSE)
+  obj <- svcopt(data, formula, subset, nperm, rho, kappa = c(.5), na.rm, seed, nthread, plot.pval = FALSE)
   
   svccor.obj <- list()
   svccor.obj$pval <- obj$pval

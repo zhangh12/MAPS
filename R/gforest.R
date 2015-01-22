@@ -1,5 +1,5 @@
 gforest <- 
-function(formula, data, subset = NULL, pdf.file = NULL, ...){
+function(formula, data, subset = NULL, pdf.file = NULL, main = NULL, width = NULL, height = NULL, ...){
   
   formula<-Formula(formula)
   
@@ -72,7 +72,23 @@ function(formula, data, subset = NULL, pdf.file = NULL, ...){
   max.G <- max(ug) + (max(ug)-min(lg)) * 3
   
   if(!is.null(pdf.file)){
-    pdf(pdf.file, ...)
+    rr <- length(snp.G)/20
+    if(is.null(height) && is.null(width)){
+      rr <- length(snp.G)/20
+      height <- max(as.integer(6 * rr), 6)
+      width <- 2 * height
+    }else if(is.null(height) && !is.null(width)){
+      height <- as.integer(width/2)
+    }else if(!is.null(height) && is.null(width)){
+      width <- as.integer(height*2)
+    }else{
+      # do nothing
+    }
+    
+    height <- max(height, 6)
+    width <- 2 * height
+    
+    pdf(pdf.file, width = width, height = height, ...)
   }
   
   par(mfrow=c(1,2), cex = .9, cex.lab=.9)
@@ -93,6 +109,12 @@ function(formula, data, subset = NULL, pdf.file = NULL, ...){
   text(max.B, 1.5+length(snp.B), labels=expression(e^beta * "  [ 95% CI ]"), pos=2)
   text(min(lb) - (max(ub)-min(lb)) * 2, 1.5+length(snp.B), labels="P-Value", pos=4)
   text(min(lb) - (max(ub)-min(lb)) * 2, length(snp.B):1, labels = signif(pv.B,2), pos=4)
+  
+  if(!is.null(main)){
+    mtext(main, 3, -4, TRUE)
+    #text((min.G + max.G)/2, 3 + length(snp.G), labels = main, pos=4)
+  }
+  
   if(!is.null(pdf.file)){
     dev.off()
   }
