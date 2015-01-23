@@ -37,9 +37,12 @@ function(data, formula = NULL, subset = NULL, na.rm = FALSE){
   stat.minp <- min(pval.SKAT.B, pval.SKAT.G)
   pval.minp <- 1-(1-stat.minp)^2
   
+#   pval <- c(VC.Hom=pval.VC.Hom, 
+#             SKAT.B=pval.SKAT.B, SKAT.G=pval.SKAT.G, 
+#             Fisher=pval.Fisher, minp=pval.minp)
+  
   pval <- c(VC.Hom=pval.VC.Hom, 
-            SKAT.B=pval.SKAT.B, SKAT.G=pval.SKAT.G, 
-            Fisher=pval.Fisher, minp=pval.minp)
+            SKAT.B=pval.SKAT.B, SKAT.G=pval.SKAT.G)
   
   svchom.obj <- list()
   svchom.obj$pval <- pval

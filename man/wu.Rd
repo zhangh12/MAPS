@@ -2,29 +2,38 @@
 \alias{wu}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-wu
+A multi-locus score test directly generalized from Wu's single-marker test.
 %%  ~~function to do ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
+This test is generalized from Wu's test. It is modified so that it allows missing genotypes (MCAR) as well. 
 }
 \usage{
-wu(formula, data, subset = NULL)
+wu(data, formula = NULL, subset = NULL, na.rm = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{formula}{
-%%     ~~Describe \code{formula} here~~
-}
   \item{data}{
 %%     ~~Describe \code{data} here~~
+a data frame containing all variables specified in \code{formula}.
+}
+  \item{formula}{
+%%     ~~Describe \code{formula} here~~
+an object of clas "\code{Formula}". The user can specify two outcomes on the left-hand side. The covariates and the variables of interest can be specified on the right-hand side. See 'Details' in page of function \code{maps}. 
 }
   \item{subset}{
 %%     ~~Describe \code{subset} here~~
+an optional vector specifying a subset of observations to be used in the testing process.
+}
+
+  \item{na.rm}{
+a logical indicating whether to allow individuals with missing values on variables of interest. The current version always set it as \code{FALSE} as using more samples can increase power. See 'Details' in page of \code{maps}.
 }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
+If only one SNP is included in \code{data}, \code{wu} is actually the test proposed in Wu et al. (2013).
 }
 \value{
 %%  ~Describe the value returned
@@ -35,9 +44,13 @@ wu(formula, data, subset = NULL)
 }
 \references{
 %% ~put references to the literature/web site here ~
+Zhang, H., Wu, C.O., Yang, Y., Berndt, S., and Yu K. (2015) A multi-locus genetic association test for a dichotomous trait and its secondary phenotype. Submitted.
+
+Wu, C.O., Zheng, G., and Kwak, M. (2013) A joint regression analysis for genetic association studies with outcome stratified samples. \emph{Biometrics} \bold{69}, 417--426.
 }
 \author{
 %%  ~~who you are~~
+Han Zhang <han.zhang2@nih.gov>
 }
 \note{
 %%  ~~further notes~~
@@ -49,81 +62,9 @@ wu(formula, data, subset = NULL)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+data(test)
+obj <- wu(data, formula)
 
-## The function is currently defined as
-function (formula, data, subset = NULL) 
-{
-    formula <- Formula(formula)
-    if (is.null(subset)) {
-        subset <- 1:nrow(data)
-    }
-    else {
-        subset <- sort(intersect(subset, 1:nrow(data)))
-    }
-    data <- data[subset, ]
-    mf <- model.frame(formula, na.action = na.pass, data = data, 
-        lhs = 1:2)
-    null.B <- model.part(formula, mf, lhs = 1, rhs = 1, drop = F)
-    null.G <- model.part(formula, mf, lhs = 2, rhs = 1, drop = F)
-    alt.B <- model.part(formula, mf, lhs = 1, rhs = 1:2, drop = F)
-    alt.G <- model.part(formula, mf, lhs = 2, rhs = 1:2, drop = F)
-    resp.B <- colnames(null.B)[1]
-    covar.B <- colnames(null.B)[-1]
-    snp.B <- setdiff(colnames(alt.B), c(resp.B, covar.B))
-    resp.G <- colnames(null.G)[1]
-    covar.G <- colnames(null.G)[-1]
-    snp.G <- setdiff(colnames(alt.G), c(resp.G, covar.G))
-    null.G <- null.G[!is.na(null.G[, resp.G]), , drop = F]
-    alt.G <- alt.G[!is.na(alt.G[, resp.G]), , drop = F]
-    n.B <- nrow(null.B)
-    n.G <- nrow(null.G)
-    n <- n.B
-    X.B <- as.matrix(cbind(Intercept = rep(1, n.B), null.B[, 
-        covar.B, drop = F]))
-    X.G <- as.matrix(cbind(Intercept = rep(1, n.G), null.G[, 
-        covar.G, drop = F]))
-    G.B <- as.matrix(alt.B[, snp.B, drop = F])
-    G.G <- as.matrix(alt.G[, snp.G, drop = F])
-    mdl0.B <- glm(as.formula(paste(resp.B, "~ .")), data = null.B, 
-        family = "binomial")
-    mdl1.B <- glm(as.formula(paste(resp.B, "~ .")), data = alt.B, 
-        family = "binomial")
-    mdl0.G <- glm(as.formula(paste(resp.G, "~ .")), data = null.G, 
-        family = "gaussian")
-    mdl1.G <- glm(as.formula(paste(resp.G, "~ .")), data = alt.G, 
-        family = "gaussian")
-    y.hat <- mdl0.B$fitted.values
-    res.B <- null.B[, resp.B] - y.hat
-    A <- y.hat * (1 - y.hat)
-    V.B <- t(G.B) \%*\% (A * G.B) - t(G.B) \%*\% (A * X.B) \%*\% solve(t(X.B) \%*\% 
-        (A * X.B)) \%*\% t(X.B) \%*\% (A * G.B)
-    V.B <- V.B/n
-    res.G <- null.G[, resp.G] - mdl0.G$fitted.values
-    s2 <- sum(res.G^2)/(n.G - ncol(X.G))
-    V.G <- (t(G.G) \%*\% G.G - t(G.G) \%*\% X.G \%*\% solve(t(X.G) \%*\% 
-        X.G) \%*\% t(X.G) \%*\% G.G)/s2
-    V.G <- V.G/n
-    S.B <- t(G.B) \%*\% res.B/sqrt(n)
-    S.G <- t(G.G) \%*\% res.G/s2/sqrt(n)
-    np.B <- nrow(V.B)
-    np.G <- nrow(V.G)
-    pval.LRT.B <- anova(mdl0.B, mdl1.B, test = "Chisq")[2, "Pr(>Chi)"]
-    pval.LRT.G <- anova(mdl0.G, mdl1.G, test = "Chisq")[2, "Pr(>Chi)"]
-    V.sc <- matrix(0, nrow = np.B + np.G, ncol = np.B + np.G)
-    V.sc[1:np.B, 1:np.B] <- V.B
-    V.sc[(np.B + 1):(np.B + np.G), (np.B + 1):(np.B + np.G)] <- V.G
-    score <- c(t(S.B), t(S.G))
-    stat.sc <- t(score) \%*\% solve(V.sc) \%*\% score
-    pval.Wu <- pchisq(stat.sc, df = np.B + np.G, lower.tail = F)
-    pval <- c(Wu = pval.Wu, LRT.B = pval.LRT.B, LRT.G = pval.LRT.G)
-    wu.obj <- list()
-    wu.obj$pval <- pval
-    class(wu.obj) <- "wu"
-    wu.obj
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

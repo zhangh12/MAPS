@@ -1,12 +1,12 @@
-Package: SVCT
+Package: MAPS
 Type: Package
-Title: Stratified Variance Component Test
-Version: 0.1.9
+Title: Multi-locus Association test for a Primary trait and its Secondary phenotype
+Version: 0.1.10
 Date: 2015-01-22
-Author: Han Zhang
+Author: Han Zhang and Yifan Yang
 Maintainer: Han Zhang <han.zhang2@nih.gov>
-Description: Variance component test for genetic association studies with outcome stratified samples
-URL: https://github.com/zhangh12/SVCT
+Description: Multi-locus Association test for a dichotomous primary trait and a quantitative secondary phenotype
+URL: https://github.com/zhangh12/MAPS
 License: GPL-3
 Depends: R (>= 3.0.0), Formula, metafor, survey, mvtnorm
 
