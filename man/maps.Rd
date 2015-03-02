@@ -62,7 +62,7 @@ Ge's minp algorithm is used in evaluating the final p-value accounting for multi
 
 One of the major problems for multi-locus test is that it doesn't allow missing genotypes. In practice, the user has to exclude individuals even with one missing entry. Although generally the SNPs included in a gene pass the quality control, e.g., missing rate < 2\%, however, a substantial proportion of individuals can be excluded in testing the association, especially for large gene. This can reduce the statistical power or more seriously, bias the inference. We propose to use the modified scores defined on all observed genotypes to generalize the score tests, which provides more flexibility to in real application. Please refer to our paper for more details.
 
-\code{maps} has some special cases. If \code{rho = 0} and \code{kappa = 0.5}, it is \eqn{\mbox{VC}_{0,1/2}}{VC_{0,1/2}} in our paper. If \code{rho = 0} and \code{kappa} varies, it is \eqn{\mbox{VC}_0}{VC_0}. If \code{kappa = 0.5} and \code{rho} varies, it is \eqn{\mbox{VC}_{cor}}{VC_cor}. If both \code{rho} and \code{kappa} vary, it is \eqn{\mbox{VC}_{opt}}{VC_opt}.
+\code{maps} has some special cases. If \code{rho = 0} and \code{kappa = 0.5}, it is \eqn{\mbox{MAPS}_{0,1/2}}{MAPS_{0,1/2}} in our paper. If \code{rho = 0} and \code{kappa} varies, it is \eqn{\mbox{MAPS}_0}{MAPS_0}. If \code{kappa = 0.5} and \code{rho} varies, it is \eqn{\mbox{MAPS}_{cor}}{MAPS_cor}. If both \code{rho} and \code{kappa} vary, it is \eqn{\mbox{MAPS}_{opt}}{MAPS_opt}.
 }
 
 \value{
@@ -78,7 +78,7 @@ An object of class "\code{maps}" is a list containing some of the following comp
 \item{pval}{the final p-value for the MAPS test. This p-value is adjusted for multiple-comparison if necessary. See 'Details'.}
 \item{rho.opt}{the optimal chosen \code{rho}.}
 \item{kappa.opt}{the optimal chosen \code{kappa}.}
-\item{nperm}{the number of replicates used in Monte Carlo test.}
+\item{nperm}{the number of replicates used in calculating the p-value.}
 \item{rho}{the vector of effect correlation parameter used in tuning process.}
 \item{kappa}{the vector of variance component proportion parameter used in tuning process.}
 \item{refine}{if \code{TRUE}, larger \code{nperm} should be try to obtain a more stable estimate of p-value.}
@@ -111,6 +111,6 @@ Han Zhang <han.zhang2@nih.gov>
 }
 \examples{
 data(test) # loading data
-obj <- maps(data, formula) # VC_opt in our paper
+obj <- maps(data, formula) # MAPS_opt in our paper
 plot(obj)
 }
